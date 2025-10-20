@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load required libraries for PDF generation -->
+     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">SaaS Invoice Builder</h1>
+
+        <!-- Main Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- INPUT FORM (Col 1 & 2) -->
+            <div id="invoice-input-form" class="lg:col-span-2 space-y-6">
+
+                <!-- Business & Client Details -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-4 text-indigo-700">1. Parties & Header</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Business Details -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Your Business Name</label>
+                            <input type="text" id="business-name" value="Creative Solutions Inc." class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+
+                            <label class="block text-sm font-medium text-gray-700 mt-4 mb-1">Logo URL (Optional)</label>
+                            <!-- Use a URL input for the logo image -->
+                            <input type="url" id="logo-url" value="" placeholder="e.g., https://placehold.co/150x50" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <!-- Client Details -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                            <input type="text" id="client-name" value="Acme Corp." class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+
+                            <label class="block text-sm font-medium text-gray-700 mt-4 mb-1">Invoice Number</label>
+                            <input type="text" id="invoice-number" value="INV-2025-001" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+
+                            <label class="block text-sm font-medium text-gray-700 mt-4 mb-1">Invoice Date</label>
+                            <input type="date" id="invoice-date" value="2025-10-18" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Items Table Input -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-4 text-indigo-700">2. Line Items</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Qty</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Price</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Total</th>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="line-items-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Default Line Item -->
+                                <tr class="item-row">
+                                    <td class="p-1"><input type="text" value="Web Design Service" class="item-description w-full p-1 border border-gray-200 rounded-md"></td>
+                                    <td class="p-1"><input type="number" min="1" value="1" class="item-quantity w-full p-1 border border-gray-200 rounded-md" oninput="calculateItemTotal(this)"></td>
+                                    <td class="p-1"><input type="number" min="0.01" value="1200.00" step="0.01" class="item-price w-full p-1 border border-gray-200 rounded-md" oninput="calculateItemTotal(this)"></td>
+                                    <td class="p-1 text-right font-medium total-cell">$1200.00</td>
+                                    <td class="p-1 text-center"><button onclick="removeItem(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none">&times;</button></td>
+                                </tr>
+                                <tr class="item-row">
+                                    <td class="p-1"><input type="text" value="Hosting & Maintenance (1 Year)" class="item-description w-full p-1 border border-gray-200 rounded-md"></td>
+                                    <td class="p-1"><input type="number" min="1" value="1" class="item-quantity w-full p-1 border border-gray-200 rounded-md" oninput="calculateItemTotal(this)"></td>
+                                    <td class="p-1"><input type="number" min="0.01" value="180.00" step="0.01" class="item-price w-full p-1 border border-gray-200 rounded-md" oninput="calculateItemTotal(this)"></td>
+                                    <td class="p-1 text-right font-medium total-cell">$180.00</td>
+                                    <td class="p-1 text-center"><button onclick="removeItem(this)" class="text-red-500 hover:text-red-700 font-bold text-lg leading-none">&times;</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <button onclick="addItemRow()" class="mt-4 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition duration-150 shadow-md flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        Add Item
+                    </button>
+                </div>
+
+                <!-- Calculations & Notes -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-4 text-indigo-700">3. Calculations & Notes</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Tax & Discount -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tax Rate (%)</label>
+                            <input type="number" id="tax-rate" value="5" min="0" max="100" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+
+                            <label class="block text-sm font-medium text-gray-700 mt-4 mb-1">Discount Amount ($)</label>
+                            <input type="number" id="discount-amount" value="0.00" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Notes / Terms</label>
+                            <textarea id="payment-notes" rows="4" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">Payment due within 30 days of the invoice date. Thank you for your business!</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button (Now mainly for manual update/confirmation) -->
+                <button onclick="generateInvoice()" class="w-full px-6 py-3 bg-indigo-600 text-white font-bold text-lg rounded-xl hover:bg-indigo-700 transition duration-150 shadow-xl focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
+                    Update Preview Manually
+                </button>
+            </div>
+
+            <!-- INVOICE PREVIEW (Col 3) -->
+            <div class="lg:col-span-1 space-y-4 sticky top-4">
+                <div id="invoice-template" class="bg-white p-8 rounded-xl shadow-2xl border border-gray-300 flex flex-col justify-between">
+                    <!-- Invoice content will be inserted here by JavaScript -->
+                    <div class="text-center text-gray-500 pt-32">Click 'Update Preview Manually' or type in the fields to generate the invoice.</div>
+                </div>
+                <!-- PDF Download Button -->
+                <button onclick="downloadPdf()" id="download-btn" class="w-full px-6 py-3 bg-red-600 text-white font-bold text-lg rounded-xl hover:bg-red-700 transition duration-150 shadow-xl focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50 flex items-center justify-center disabled:opacity-50" disabled>
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2-8H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2z"></path></svg>
+                    Download Invoice as PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>

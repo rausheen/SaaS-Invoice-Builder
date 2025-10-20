@@ -1,0 +1,29 @@
+
+        /* Set Inter as the primary font and ensure smooth scrolling */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* CUSTOM BACKGROUND: Added subtle radial gradients for a modern SaaS demo feel */
+            background-color: #f3f4f6; /* Tailwind gray-100 base color */
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(167, 139, 250, 0.2) 0px, transparent 50%), /* Subtle Violet spot */
+                radial-gradient(at 80% 90%, rgba(239, 68, 68, 0.1) 0px, transparent 50%); /* Subtle Red spot */
+            background-attachment: fixed; /* Ensures the pattern stays put on scroll */
+            min-height: 100vh;
+        }
+        /* Custom styles for the printable invoice area */
+        #invoice-template {
+            transition: all 0.3s ease-in-out;
+            min-height: 800px;
+        }
+        /* Hide all inputs and buttons when printing the template */
+        @media print {
+            body > div:not(#invoice-template) {
+                display: none;
+            }
+            #invoice-template {
+                margin: 0;
+                box-shadow: none;
+                border: none;
+            }
+        }
+        
